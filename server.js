@@ -1,4 +1,4 @@
-// server.js kodunun tamamı
+
 // Gerekli kütüphaneleri dahil etme
 const express = require('express');
 const http = require('http');
@@ -11,8 +11,8 @@ const io = socketio(server);
 
 // Sabitler
 const PORT = process.env.PORT || 3000;
-let players = {}; // Oyuncuları ve odaları tutmak için boş bir nesne
-let scores = {}; // Puanları tutmak için
+let players = {}; // Oyuncuları ve odaları tutmak için
+let scores = { '1': 0, '2': 0 }; // Puanları tutmak için
 const MAX_SCORE = 10;
 
 // Express'e, istemci dosyalarını ana klasörde aramasını söyleme
@@ -22,11 +22,10 @@ app.use(express.static(__dirname));
 io.on('connection', (socket) => {
     console.log(`Yeni bir kullanıcı bağlandı: ${socket.id}`);
 
-    // Oyuncu 1 veya Oyuncu 2 olarak atanması
+    // Oyuncu 1 veya Oyuncu 2 olarak atanması mantığı
     let playerNumber;
     let availableSlot = true;
 
-    // Oyuncu listesini temizleyerek 2'den fazla oyuncu bağlantısını önleme
     const activePlayers = Object.keys(players);
     if (activePlayers.length === 0) {
         playerNumber = 1;
@@ -52,55 +51,66 @@ io.on('connection', (socket) => {
         }
     }
 
-    // İstemciden gelen "seçimYapıldı" mesajını işleme
+    // İstemciden gelen "seçimYapıldı" mesajını işleme (BURASI DÜZELTİLDİ)
     socket.on('seçimYapıldı', (choice) => {
-        const player = players[socket.id];
-        if (!player) return;
-
+        // 1. Oyuncunun varlığını ve numarasını doğru bul
+        const playerIds = Object.keys(players);
+        const currentPlayerId = playerIds.find(id => id === socket.id);
+        const player = players[currentPlayerId];
+        
+        if (!player) return; // Oyuncu kayıtlı değilse durdur
+        
         player.choice = choice; // Seçimi kaydet
-        console.log(`Oyuncu ${player.playerNumber} seçimi: ${choice}`);
+        
+        console.log(`Oyuncu ${player.playerNumber} seçimi kaydedildi: ${choice}`); // Tıklama logu
         
         socket.emit('seçimOnayı', `Seçimin kaydedildi: ${choice}. Rakip bekleniyor...`);
 
-        // İki oyuncu da seçim yaptı mı kontrol etme
-        const playerIds = Object.keys(players);
+        // 2. İki oyuncu da seçim yaptı mı kontrol etme
         if (playerIds.length === 2 && players[playerIds[0]].choice && players[playerIds[1]].choice) {
             
-            const p1 = players[playerIds.find(id => players[id].playerNumber === 1)];
-            const p2 = players[playerIds.find(id => players[id].playerNumber === 2)];
-
-            const winnerResult = determineWinner(p1.choice, p2.choice); // Kazananı belirle
+            // P1 ve P2'yi numara ile doğru bul
+            const p1 = playerIds.map(id => players[id]).find(p => p.playerNumber === 1);
+            const p2 = playerIds.map(id => players[id]).find(p => p.playerNumber === 2);
             
-            let message;
-            if (winnerResult === 'draw') {
-                message = 'Berabere! İkiniz de aynı şeyi seçtiniz. 🤝';
-            } else if (winnerResult === 'win_p1') {
-                scores['1']++;
-                message = `Oyuncu 1 kazandı! ${p1.choice} , ${p2.choice}'ı yener.`;
-            } else { // win_p2
-                scores['2']++;
-                message = `Oyuncu 2 kazandı! ${p2.choice} , ${p1.choice}'ı yener.`;
-            }
-            
-            // Sonucu her iki oyuncuya da gönder
-            io.emit('sonuçAçıklandı', { 
-                results: winnerResult,
-                p1Choice: p1.choice,
-                p2Choice: p2.choice,
-                message: message,
-                scores: scores
-            });
+            // Eğer her iki oyuncu da hala bağlıysa devam et
+            if (p1 && p2) {
+                const winnerResult = determineWinner(p1.choice, p2.choice); 
+                
+                let message;
+                if (winnerResult === 'draw') {
+                    message = 'Berabere! İkiniz de aynı şeyi seçtiniz. 🤝';
+                } else if (winnerResult === 'win_p1') {
+                    scores['1']++;
+                    message = `Oyuncu 1 (Melek) kazandı! ${p1.choice} , ${p2.choice}'ı yener.`;
+                } else { // win_p2
+                    scores['2']++;
+                    message = `Oyuncu 2 (Şeytan) kazandı! ${p2.choice} , ${p1.choice}'ı yener.`;
+                }
+                
+                // Sonucu yayınla
+                io.emit('sonuçAçıklandı', { 
+                    results: winnerResult,
+                    p1Choice: p1.choice,
+                    p2Choice: p2.choice,
+                    message: message,
+                    scores: scores
+                });
 
-            // Final kontrolü
-            if (scores['1'] >= MAX_SCORE || scores['2'] >= MAX_SCORE) {
-                const finalWinner = scores['1'] >= MAX_SCORE ? 1 : 2;
-                io.emit('gameOver', { winner: finalWinner });
-                scores = { '1': 0, '2': 0 }; // Puanları sıfırla, yeni oyuna hazır ol
-            }
+                // Final kontrolü
+                if (scores['1'] >= MAX_SCORE || scores['2'] >= MAX_SCORE) {
+                    const finalWinner = scores['1'] >= MAX_SCORE ? 1 : 2;
+                    io.emit('gameOver', { winner: finalWinner });
+                    scores = { '1': 0, '2': 0 }; 
+                }
 
-            // Bir sonraki tur için seçimleri sıfırla
-            p1.choice = null;
-            p2.choice = null;
+                // Bir sonraki tur için seçimleri sıfırla
+                p1.choice = null;
+                p2.choice = null;
+                
+            } else {
+                io.emit('rakipAyrıldı', 'Rakip beklenmedik şekilde ayrıldı.');
+            }
         }
     });
 
@@ -115,7 +125,7 @@ io.on('connection', (socket) => {
 });
 
 /**
- * Kazananı belirleyen fonksiyon (Bu fonksiyon, sunucu tarafında çalışır).
+ * Kazananı belirleyen fonksiyon
  */
 function determineWinner(choiceA, choiceB) {
     if (choiceA === choiceB) {
