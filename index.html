@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taş-Kağıt-Makas Oyunu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Taş-Kağıt-Makas: Melekler ve Şeytanlar</h1>
+    </header>
+
+    <div class="score-board">
+        <div id="user-score" class="score">Oyuncu 1: 0</div>
+        <div id="computer-score" class="score">Oyuncu 2: 0</div>
+    </div>
+
+    <div id="countdown-display" class="countdown">
+        Bağlanıyor...
+    </div>
+    
+    <div class="choices">
+        <button id="rock" class="choice-button" data-choice="Taş">
+            <span role="img" aria-label="Taş">✊</span> 
+        </button>
+        <button id="paper" class="choice-button" data-choice="Kağıt">
+            <span role="img" aria-label="Kağıt">🖐️</span> 
+        </button>
+        <button id="scissors" class="choice-button" data-choice="Makas">
+            <span role="img" aria-label="Makas">✌️</span> 
+        </button>
+    </div>
+
+    <div class="selections-display">
+        <p id="user-selection" class="selection-text">Oyuncu Seçimi</p>
+        <p id="computer-selection" class="selection-text">Rakip Seçimi</p>
+    </div>
+
+    <p id="result-message">İlk 10 puana ulaşan oyunu kazanır!</p>
+
+    <audio id="bg-music" src="muzik.mp3" loop volume="0.1"></audio> 
+    <audio id="countdown-sound" src="gerisayim.mp3"></audio> 
+    <audio id="victory-sound" src="kazanma.mp3"></audio> 
+    <audio id="loss-sound" src="kaybetme.mp3"></audio> 
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>

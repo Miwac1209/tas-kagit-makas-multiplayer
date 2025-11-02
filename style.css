@@ -1,0 +1,130 @@
+
+   body {
+    font-family: 'Arial', sans-serif; /* Temaya uygun daha ciddi bir font */
+    display: flex; 
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    
+    /* KOYU TEMA ve GÖRSEL YOLU */
+    background-color: #121212; /* Koyu Gri/Siyah Arka Plan */
+    background-image: url('melek-seytan.jpg'); /* Yeni görselinizin adı ve uzantısı */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Görselin sabit kalmasını sağlar */
+    
+    color: #f7f7f7; /* Koyu arka planda okunması için BEYAZ metin */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9); /* Metinleri daha belirgin yap */
+}
+
+header h1 {
+    color: #f7f7f7; /* Açık Gri/Beyaz Başlık */
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: rgba(0, 0, 0, 0.7); /* Başlık arka planını yarı saydam siyah yaptık */
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2); /* Hafif parlama efekti */
+}
+
+.score-board {
+    display: flex;
+    justify-content: space-around;
+    width: 350px;
+    margin-bottom: 30px;
+    padding: 15px;
+    border: 3px solid #6a0505; /* Koyu kırmızı/karanlık sınır */
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.95); /* Puan tablosu içi beyaz kalabilir */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.score {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #333; /* Puan tablosu metin rengi (beyaz kutu içinde koyu renk) */
+}
+
+.choices {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.choice-button {
+    padding: 15px 30px; 
+    font-size: 1.2em;
+    cursor: pointer;
+    border: 3px solid #e74c3c; /* Kırmızımsı kenarlık */
+    border-radius: 15px;
+    background-color: #c0392b; /* Koyu kırmızı düğme rengi (Şeytan temsili) */
+    color: white;
+    transition: background-color 0.3s ease, transform 0.1s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 5px 0 #922b21; 
+}
+
+.choice-button:hover:not(:disabled) {
+    background-color: #e74c3c; /* Daha parlak kırmızı */
+    transform: translateY(2px); 
+    box-shadow: 0 3px 0 #922b21;
+}
+
+.choice-button:disabled {
+    opacity: 0.5; 
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.choice-button span {
+    font-size: 3em; 
+    margin: 0;
+}
+
+#result-message {
+    font-size: 1.6em;
+    font-weight: 800;
+    margin-top: 15px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: #f7f7f7; /* Beyaz Metin */
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* YENİ ALANLAR */
+.countdown {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #f1c40f; /* Sarı/Altın rengi (Işık temsili) */
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+}
+
+.selections-display {
+    display: flex;
+    gap: 50px;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.selection-text {
+    min-width: 150px; 
+    text-align: center;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.7); /* Koyu Arka Plan */
+    color: #f7f7f7; /* Beyaz Metin */
+    border-radius: 5px;
+}
+
+/* JavaScript ile eklenecek sınıflar için stil */
+.win { background-color: #2ecc71; color: white;} /* Yeşil (Zafer) */
+.lose { background-color: #e74c3c; color: white;} /* Kırmızı (Kaybetme) */
+.draw { background-color: #f1c40f; color: #333;} /* Sarı/Altın (Beraberlik) */
+.final-winner { background-color: #f39c12; color: #4a2300; padding: 20px; border: 5px solid gold; font-size: 2.5em; }
