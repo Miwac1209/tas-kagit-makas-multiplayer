@@ -7,7 +7,14 @@ const socketio = require('socket.io');
 // Express uygulamasını ve HTTP sunucusunu başlatma
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server);
+
+// Socket.IO'yu HTTPS/Render sunucusu için gerekli İZİN ayarlarıyla başlatma (KESİN ÇÖZÜM)
+const io = socketio(server, {
+    cors: {
+        origin: "*", // Tüm adreslerden bağlantıya izin ver
+        methods: ["GET", "POST"]
+    }
+});
 
 // Sabitler
 const PORT = process.env.PORT || 3000;
@@ -29,7 +36,7 @@ io.on('connection', (socket) => {
     const activePlayers = Object.keys(players);
     if (activePlayers.length === 0) {
         playerNumber = 1;
-        scores = { '1': 0, '2': 0 }; // Yeni oyun, puanları sıfırla
+        scores = { '1': 0, '2': 0 }; 
     } else if (activePlayers.length === 1) {
         playerNumber = 2;
     } else {
@@ -40,7 +47,7 @@ io.on('connection', (socket) => {
     if (availableSlot) {
         players[socket.id] = { playerNumber: playerNumber, choice: null };
         socket.emit('playerNumber', playerNumber);
-        io.emit('scoreUpdate', scores); // Yeni oyuncuya mevcut puanları gönder
+        io.emit('scoreUpdate', scores); 
         
         console.log(`Oyuncu ${playerNumber} olarak atandı.`);
 
@@ -51,18 +58,18 @@ io.on('connection', (socket) => {
         }
     }
 
-    // İstemciden gelen "seçimYapıldı" mesajını işleme (BURASI DÜZELTİLDİ)
+    // İstemciden gelen "seçimYapıldı" mesajını işleme
     socket.on('seçimYapıldı', (choice) => {
         // 1. Oyuncunun varlığını ve numarasını doğru bul
         const playerIds = Object.keys(players);
         const currentPlayerId = playerIds.find(id => id === socket.id);
         const player = players[currentPlayerId];
         
-        if (!player) return; // Oyuncu kayıtlı değilse durdur
+        if (!player) return;
         
-        player.choice = choice; // Seçimi kaydet
+        player.choice = choice; 
         
-        console.log(`Oyuncu ${player.playerNumber} seçimi kaydedildi: ${choice}`); // Tıklama logu
+        console.log(`Oyuncu ${player.playerNumber} seçimi kaydedildi: ${choice}`);
         
         socket.emit('seçimOnayı', `Seçimin kaydedildi: ${choice}. Rakip bekleniyor...`);
 
@@ -73,7 +80,6 @@ io.on('connection', (socket) => {
             const p1 = playerIds.map(id => players[id]).find(p => p.playerNumber === 1);
             const p2 = playerIds.map(id => players[id]).find(p => p.playerNumber === 2);
             
-            // Eğer her iki oyuncu da hala bağlıysa devam et
             if (p1 && p2) {
                 const winnerResult = determineWinner(p1.choice, p2.choice); 
                 
@@ -117,9 +123,9 @@ io.on('connection', (socket) => {
     // Oyuncu bağlantıyı kestiğinde
     socket.on('disconnect', () => {
         console.log(`Kullanıcı bağlantıyı kesti: ${socket.id}`);
-        delete players[socket.id]; // Oyuncuyu listeden kaldır
+        delete players[socket.id]; 
         io.emit('rakipAyrıldı', 'Rakip oyundan ayrıldı. Yeni oyuncu bekleniyor...');
-        scores = { '1': 0, '2': 0 }; // Oyuncu sayısı 1'e düştüğü için puanları sıfırla
+        scores = { '1': 0, '2': 0 }; 
         io.emit('scoreUpdate', scores);
     });
 });
