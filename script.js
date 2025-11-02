@@ -1,6 +1,6 @@
 // Socket.IO ile sunucuya bağlanma
-// Sunucu aynı bilgisayarda çalıştığı için bu adres kullanılır
-const socket = io('http://localhost:3000'); 
+// NOT: io() yazmak, Render'da doğru adrese (canlı siteye) bağlanmayı sağlar.
+const socket = io(); 
 
 // HTML elemanlarını seçme
 const userScoreElement = document.getElementById('user-score');
@@ -23,7 +23,6 @@ let gameReady = false;
 let isMusicPlaying = false; 
 
 // Ses ve Stil Ayarları
-// Arka plan müziği sesini JavaScript ile ayarla (HTML'deki ayarı destekler)
 bgMusic.volume = 0.1;
 
 // Seçimlerin Emojileri
@@ -112,102 +111,4 @@ socket.on('scoreUpdate', (scores) => {
     computerScoreElement.textContent = `Oyuncu 2: ${scores['2']}`;
 });
 
-// 5. Sunucudan sonuç geldiğinde (TUR SONUÇLARI)
-socket.on('sonuçAçıklandı', (data) => {
-    
-    // Seçimlerin gösterimi (P1 ve P2'nin seçimi)
-    userSelectionDisplay.textContent = `P1: ${EMOJIS[data.p1Choice]}`;
-    computerSelectionDisplay.textContent = `P2: ${EMOJIS[data.p2Choice]}`;
-    
-    resultMessageElement.textContent = data.message;
-    userScoreElement.textContent = `Oyuncu 1: ${data.scores['1']}`;
-    computerScoreElement.textContent = `Oyuncu 2: ${data.scores['2']}`;
-    
-    let winnerID = '';
-
-    if (data.results === 'win_p1') {
-        winnerID = '1';
-    } else if (data.results === 'win_p2') {
-        winnerID = '2';
-    }
-    
-    // Tur sonucu stilini belirle ve geri sayım sesini sıfırla
-    countdownSound.pause(); // Geri sayım sesini kapat
-    resultMessageElement.className = '';
-    
-    // Hangi oyuncu kazandıysa (bizsek yeşil, rakipse kırmızı)
-    if (winnerID !== '' && winnerID === myPlayerNumber.toString()) {
-        resultMessageElement.classList.add('win');
-    } else if (winnerID !== '' && winnerID !== myPlayerNumber.toString()) {
-        resultMessageElement.classList.add('lose');
-    } else {
-        resultMessageElement.classList.add('draw');
-    }
-
-    // Bir sonraki tur için düğmeleri aç
-    toggleButtons(false); // Oyun bitti mesajı gelene kadar kapalı kalır
-    countdownDisplay.textContent = "Tekrar Seçimini Yapın.";
-});
-
-// 6. Rakip oyundan ayrıldığında
-socket.on('rakipAyrıldı', (message) => {
-    gameReady = false;
-    resultMessageElement.textContent = message;
-    toggleButtons(true);
-    userScoreElement.textContent = `Oyuncu 1: 0`;
-    computerScoreElement.textContent = `Oyuncu 2: 0`;
-});
-
-// 7. Oyun bittiğinde (FINAL SONUCU)
-socket.on('gameOver', (data) => {
-    bgMusic.pause();
-    toggleButtons(true);
-    
-    // Final seslerini sıfırla ve çal
-    victorySound.pause(); victorySound.currentTime = 0;
-    lossSound.pause(); lossSound.currentTime = 0;
-
-    let finalMessage = "";
-    if (data.winner === myPlayerNumber) {
-        finalMessage = "Tebrikler! Oyunu KAZANDIN! 🏆";
-        victorySound.play().catch(e => console.error("Final Kazanma Sesi Hatası:", e));
-    } else {
-        finalMessage = "Rakip Kazandı. Bir daha dene! 💔";
-        lossSound.play().catch(e => console.error("Final Kaybetme Sesi Hatası:", e));
-    }
-
-    resultMessageElement.textContent = finalMessage;
-    resultMessageElement.classList.add('final-winner');
-    countdownDisplay.textContent = "Oyun Bitti. Yeni Oyun için sayfayı yenile.";
-});
-
-
-// --- OLAY DİNLEYİCİLERİ (Düğmelere Tıklama) ---
-
-choiceButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        // Müzik çalmaya başlamadıysa, ilk tıklamada başlat
-        if (!isMusicPlaying) {
-            bgMusic.play().catch(e => console.error("Müzik çalma hatası:", e)); 
-            isMusicPlaying = true;
-            countdownDisplay.textContent = "Seçiminizi yapın!";
-        }
-        
-        // Sadece oyun hazırsa ve oyuncu atanmışsa seçim yap
-        if (gameReady && myPlayerNumber !== 0) {
-            const userChoice = button.getAttribute('data-choice'); 
-            
-            // Seçimi sunucuya gönder
-            socket.emit('seçimYapıldı', userChoice); 
-            
-            countdownDisplay.textContent = `Seçim kilitleniyor...`;
-            startCountdown(userChoice);
-        } else if (myPlayerNumber === 0) {
-            alert("Lütfen bir oyuncu olarak atanmayı bekleyin.");
-        } else {
-            alert("Rakip bekleniyor. Lütfen sabırlı olun.");
-        }
-    });
-});
- 
-        
+// 5. Sunucudan sonuç geldiğinde (TUR SON
