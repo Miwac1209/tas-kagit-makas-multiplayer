@@ -1,6 +1,6 @@
 // Socket.IO ile sunucuya bağlanma
-// NOT: io() yazmak, Render'da doğru adrese (canlı siteye) bağlanmayı sağlar.
-const socket = io(); 
+// Render adresini doğrudan kullanıyoruz. Bu, tarayıcının doğru yere bağlanmasını sağlar.
+const socket = io('https://tas-kagit-makas-multiplayer.onrender.com'); 
 
 // HTML elemanlarını seçme
 const userScoreElement = document.getElementById('user-score');
@@ -18,7 +18,7 @@ const victorySound = document.getElementById('victory-sound');
 const lossSound = document.getElementById('loss-sound');
 
 // Oyun Durum Değişkenleri
-let myPlayerNumber = 0; // Bu oyuncunun P1 mi P2 mi olduğunu tutar
+let myPlayerNumber = 0; 
 let gameReady = false;
 let isMusicPlaying = false; 
 
@@ -111,4 +111,4 @@ socket.on('scoreUpdate', (scores) => {
     computerScoreElement.textContent = `Oyuncu 2: ${scores['2']}`;
 });
 
-// 5. Sunucudan sonuç geldiğinde (TUR SON
+//
